@@ -1,16 +1,30 @@
 ## Instructions
 
-- This technical assessment consist of 2 components.
-- Component 1:
+- the code doesn't run because of declared variables not being used
+- first loop seems unnecessary
 
-  - within `folders.go`.
-    - We would like you to read through the code and run the code.
-    - Write some comments on what you think the code does.
-    - suggest some improvement that can be made to the code.
-    - Implement the suggested improvement.
-    - Write up some unit tests in `folders_test.go` for your new `GetAllFolders` method
+  considering some sample data results from FetchAllFoldersByOrgId
 
-- Component 2:
-  - Extend your improved code to now facilitate pagination.
-  - You can copy over the existing methods into `folders_pagination.go` to get started.
-  - Write a short explanation on why you choosen the solution you implemented.
+r := []\*Folder{
+&Folder{"1", "Folder1", "Org1", false},
+&Folder{"2", "Folder2", "Org1", false},
+&Folder{"3", "Folder3", "Org2", true},
+}
+
+after the first loop we get the following
+
+f := []Folder{
+Folder{"1", "Folder1", "Org1", false},
+Folder{"2", "Folder2", "Org1", false},
+Folder{"3", "Folder3", "Org2", true},
+}
+
+its better to just use R straight
+
+the second loop looks weird as well because the results look like this
+
+fp := []\*Folder{
+&Folder{"3", "Folder3", "Org2", true}, // Incorrect: all pointing to the last folder
+&Folder{"3", "Folder3", "Org2", true}, // because &v1 is the same in each iteration
+&Folder{"3", "Folder3", "Org2", true},
+}
