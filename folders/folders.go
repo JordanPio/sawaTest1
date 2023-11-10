@@ -18,12 +18,7 @@ import (
 func GetAllFolders(req *FetchFolderRequest) (*FetchFolderResponse, error) {
 
 
-	// the following block of variables are declared but not uses which is not a good practice and preventing the code to even run
-	var (
-		err error // unused variable intended for error handling
-		f1  Folder // unused variable intended to hold a folder instance
-		fs  []*Folder // unused variable intended to hold a slice of pointers to a folder instance
-	)
+
 	f := []Folder{} // initializes a slice to hold folder structs - SLICE is similar to array in JS
 
 	// this calls the function FetchAllFoldersByOrgID and its ignoring any errors which is not a good practice
@@ -32,14 +27,14 @@ func GetAllFolders(req *FetchFolderRequest) (*FetchFolderResponse, error) {
 	r, _ := FetchAllFoldersByOrgID(req.OrgID)
 
 	// iterate over the results from fetchAllFoldersByOrgID
-	for k, v := range r { // THIS LOOP SEEMS TO BE UNNECESSARY
+	for _, v := range r { // THIS LOOP SEEMS TO BE UNNECESSARY
 
 		f = append(f, *v) // dereferences each pointer and append the folder struct to the slice 'f'
 	}
 	var fp []*Folder // initializes  a slice to hold pointers to folder structs
 
 	// iterates over f containing folder structs
-	for k1, v1 := range f { // THIS LOOP SEEMS TO BE INCORRECT
+	for _, v1 := range f { // THIS LOOP SEEMS TO BE INCORRECT
 		fp = append(fp, &v1) // takes the address of each Folder struct and appends it to the slice 'fp'
 	}
 	var ffr *FetchFolderResponse // declares a pointer to a FetchFolderResponse.
