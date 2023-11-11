@@ -28,3 +28,7 @@ fp := []\*Folder{
 &Folder{"3", "Folder3", "Org2", true}, // because &v1 is the same in each iteration
 &Folder{"3", "Folder3", "Org2", true},
 }
+
+-- creating tests
+
+- added a library testify to help with assertion methods
