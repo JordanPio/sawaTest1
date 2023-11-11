@@ -16,30 +16,16 @@ import (
 
 // this function retrieves all folders related to an organization ID returning in the response and error
 func GetAllFolders(req *FetchFolderRequest) (*FetchFolderResponse, error) {
+	 // Fetch all folders by organization ID and handle any errors
+    folders, err := FetchAllFoldersByOrgID(req.OrgID)
+    if err != nil {
+        // Return the error to the caller
+        return nil, err
+    }
 
-
-
-	f := []Folder{} // initializes a slice to hold folder structs - SLICE is similar to array in JS
-
-	// this calls the function FetchAllFoldersByOrgID and its ignoring any errors which is not a good practice
-	// errors should be checked and handled properly
-
-	r, _ := FetchAllFoldersByOrgID(req.OrgID)
-
-	// iterate over the results from fetchAllFoldersByOrgID
-	for _, v := range r { // THIS LOOP SEEMS TO BE UNNECESSARY
-
-		f = append(f, *v) // dereferences each pointer and append the folder struct to the slice 'f'
-	}
-	var fp []*Folder // initializes  a slice to hold pointers to folder structs
-
-	// iterates over f containing folder structs
-	for _, v1 := range f { // THIS LOOP SEEMS TO BE INCORRECT
-		fp = append(fp, &v1) // takes the address of each Folder struct and appends it to the slice 'fp'
-	}
-	var ffr *FetchFolderResponse // declares a pointer to a FetchFolderResponse.
-	ffr = &FetchFolderResponse{Folders: fp} // initializes FetchFolderResponse with the slice 'fp'
-	return ffr, nil // returns the response struct and a nil error
+    // Create the FetchFolderResponse with the slice 'folders'
+    ffr := &FetchFolderResponse{Folders: folders}
+    return ffr, nil
 }
 
 // this function retrieves all Folder instances that match an organization ID
