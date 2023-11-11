@@ -31,4 +31,11 @@ fp := []\*Folder{
 
 -- creating tests
 
-- added a library testify to help with assertion methods
+note: added a library testify to help with assertion methods
+
+- by printing out the results of my first test on terminal I could validate that the second loop was creating a bug by changing the data.
+  -- After I was also able to validate that the first loop was unnecessary since I could simplify using the returns from FetchAllFoldersByOrgID straight in my response
+  --I've refactor the function and rename variables to make the code cleaner and more concise
+- created additional test to check what would happen if we pass an OrgId that does not exist and its all --
+
+the tests validate that my function is working correct after refactoring

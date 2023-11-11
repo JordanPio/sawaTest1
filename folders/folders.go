@@ -2,17 +2,8 @@ package folders
 
 import (
 	"github.com/gofrs/uuid"
+	"fmt"
 )
-// Recommendations
-// fix issues that prevent the code from running - such as removing unused variables
-// have better naming conventions as its quite confusing at the moment
-// try to run the code after that
-// add proper error handling
-// create unit tests for the functions
-// the first loop seems to be unnecessary as its just copying the data from a pointer to a value and then back to a pointer again - I believe we can remove this for improving performance
-// the second loop also seems unnecessary and it seems to be wrong as it reuses the loop variable address which can leap to all elements in 'fp' pointing to the same instance
-
-
 
 // this function retrieves all folders related to an organization ID returning in the response and error
 func GetAllFolders(req *FetchFolderRequest) (*FetchFolderResponse, error) {
@@ -20,12 +11,12 @@ func GetAllFolders(req *FetchFolderRequest) (*FetchFolderResponse, error) {
     folders, err := FetchAllFoldersByOrgID(req.OrgID)
     if err != nil {
         // Return the error to the caller
-        return nil, err
+        return nil, fmt.Errorf("failed to fetch folders by org ID: %w", err)
     }
 
     // Create the FetchFolderResponse with the slice 'folders'
-    ffr := &FetchFolderResponse{Folders: folders}
-    return ffr, nil
+    response := &FetchFolderResponse{Folders: folders}
+    return response, nil
 }
 
 // this function retrieves all Folder instances that match an organization ID
