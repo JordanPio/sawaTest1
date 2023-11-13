@@ -2,7 +2,7 @@ package folders_test
 
 import (
 	"testing"
-	// "fmt"
+	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/georgechieng-sc/interns-2022/folders"
 	"github.com/stretchr/testify/assert"
@@ -90,34 +90,60 @@ func TestGetPaginatedAllFolders(t *testing.T) {
 		assert.True(t, secondFolder.Deleted)
 
 		// Ensure there's no next cursor after the second folder, indicating the end of the data
-		assert.Empty(t, nextResp.NextCursor)
+		assert.Equal(t, "END_OF_DATA", nextResp.NextCursor)
+
 	})
 
-//
-// 	t.Run("Paginate Beyond Data Set", func(t *testing.T) {
-// 		// Request the first page
-// 		req := &folders.PaginatedFetchFolderRequest{
-// 			OrgID:  orgID,
-// 			Limit:  1,
-// 			Cursor: "",
-// 		}
-// 		resp, _ := folders.GetPaginatedAllFolders(req)
-//
-// 		// Request a page beyond the available data
-// 		nextReq := &folders.PaginatedFetchFolderRequest{
-// 			OrgID:  orgID,
-// 			Limit:  1,
-// 			Cursor: resp.NextCursor,
-// 		}
-// 		nextResp, err := folders.GetPaginatedAllFolders(nextReq)
-// 		assert.NoError(t, err)
-// 		assert.NotNil(t, nextResp)
-//
-// 		// Since we only have 2 folders, and we're requesting the third page, it should be empty
-// 		assert.Empty(t, nextResp.Folders)
-// 		// The next cursor should also be empty since there is no more data
-// 		assert.Empty(t, nextResp.NextCursor)
-// 	})
+
+	t.Run("Paginate Beyond Data Set", func(t *testing.T) {
+		// Request the first page
+		firstReq := &folders.PaginatedFetchFolderRequest{
+			OrgID:  orgID,
+			Limit:  1, // Assuming limit is set to the number of folders per page
+			Cursor: "",
+		}
+		firstResp, _ := folders.GetPaginatedAllFolders(firstReq)
+
+		//   for _, folder := range firstResp.Folders {
+        //     fmt.Printf("Folder ID: %s, Name: %s, OrgID: %s, Deleted: %v\n",
+        //         folder.Id, folder.Name, folder.OrgId, folder.Deleted)
+        // }
+
+		// Request the second page using the cursor from the first response
+		secondReq := &folders.PaginatedFetchFolderRequest{
+			OrgID:  orgID,
+			Limit:  1,
+			Cursor: firstResp.NextCursor,
+		}
+		secondResp, _ := folders.GetPaginatedAllFolders(secondReq)
+
+		// 	  for _, folder := range secondResp.Folders {
+        //     fmt.Printf("Folder ID: %s, Name: %s, OrgID: %s, Deleted: %v\n",
+        //         folder.Id, folder.Name, folder.OrgId, folder.Deleted)
+        // }
+
+		// Now, try to get the third page, which should be empty
+		thirdReq := &folders.PaginatedFetchFolderRequest{
+			OrgID:  orgID,
+			Limit:  1,
+			Cursor: secondResp.NextCursor,
+		}
+		thirdResp, err := folders.GetPaginatedAllFolders(thirdReq)
+
+		if len(thirdResp.Folders) > 0 {
+        // If there are folders, print their details
+        for _, folder := range thirdResp.Folders {
+            fmt.Printf(" THIRD FOLDER ------- Folder ID: %s, Name: %s, OrgID: %s, Deleted: %v\n",
+                folder.Id, folder.Name, folder.OrgId, folder.Deleted)
+        }
+    }
+
+		// Assertions to ensure the third response is empty
+		assert.NoError(t, err)
+		assert.Empty(t, thirdResp.Folders, "Expected no folders on the third page")
+		assert.Equal(t, "END_OF_DATA", thirdResp.NextCursor)
+
+	})
 
 
 	t.Run("Invalid Cursor Token", func(t *testing.T) {
@@ -145,7 +171,7 @@ func TestGetPaginatedAllFolders(t *testing.T) {
 			// We expect to get all folders since the limit exceeds the number of available folders
 			assert.Len(t, resp.Folders, 2)
 			// Since all data is fetched, the next cursor should be empty
-			assert.Empty(t, resp.NextCursor)
+			assert.Equal(t, "END_OF_DATA", resp.NextCursor)
 		})
 
 }

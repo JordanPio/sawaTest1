@@ -46,4 +46,5 @@ the tests validate that my function is working correct after refactoring
 
 - I've research between the different types such as offset-based, cursor-based, keyset and seek method and considering the Requirements I decided to go with the cursor-based.
   I believe it is a good fit for this assignment because it is efficient for the server as there is no counting of rows and can handles the potential of new data well.
-- I've created some tests for the function and it looks good
+- I've created some tests for the function
+- Found a bug on my function due to my test "Paginate Beyond Data Set" and fixed

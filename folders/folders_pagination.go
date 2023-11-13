@@ -24,52 +24,56 @@ type PaginatedFetchFolderResponse struct {
 
 // Pagination logic in GetAllFolders
 func GetPaginatedAllFolders(req *PaginatedFetchFolderRequest) (*PaginatedFetchFolderResponse, error) {
-	// Use GetAllFolders to fetch all folders
-	nonPaginatedResponse, err := GetAllFolders(&FetchFolderRequest{OrgID: req.OrgID})
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch all folders: %w", err)
-	}
-	allFolders := nonPaginatedResponse.Folders
 
-	// Parse the cursor to get the starting point for this page
-	startingAfter, err := parsePaginationToken(req.Cursor)
-	if err != nil {
-		return nil, err // appropriate error handling
-	}
+	if req.Cursor == "END_OF_DATA" {
+        return &PaginatedFetchFolderResponse{
+            Folders:    []*Folder{}, // Empty slice
+            NextCursor: "END_OF_DATA",
+        }, nil
+    }
+    // Use GetAllFolders to fetch all folders
+    nonPaginatedResponse, err := GetAllFolders(&FetchFolderRequest{OrgID: req.OrgID})
+    if err != nil {
+        return nil, fmt.Errorf("failed to fetch all folders: %w", err)
+    }
+    allFolders := nonPaginatedResponse.Folders
 
-	// Find the starting index based on the cursor's last ID
-	startIndex := 0
-	if startingAfter != nil {
-		for i, folder := range allFolders {
-			if folder.Id == startingAfter.LastID {
-				startIndex = i + 1
-				break
-			}
-		}
-	}
+    // Parse the cursor to get the starting point for this page
+    startingAfter, err := parsePaginationToken(req.Cursor)
+    if err != nil {
+        return nil, err // appropriate error handling
+    }
 
-	// Calculate the endIndex, making sure we don't go beyond the number of available folders
-	endIndex := startIndex + req.Limit
-	if endIndex > len(allFolders) {
-		endIndex = len(allFolders)
-	}
+    // Find the starting index based on the cursor's last ID
+    startIndex := 0
+    if startingAfter != nil {
+        for i, folder := range allFolders {
+            if folder.Id == startingAfter.LastID {
+                startIndex = i + 1
+                break
+            }
+        }
+    }
 
-	// Create the paginated slice of folders
-	foldersPage := allFolders[startIndex:endIndex]
+    // Calculate the endIndex, making sure we don't go beyond the number of available folders
+    endIndex := startIndex + req.Limit
+    if endIndex > len(allFolders) {
+        endIndex = len(allFolders)
+    }
 
-	// Generate the next cursor token if there's more data
-	var nextCursor string
-	if endIndex < len(allFolders) {
-		nextCursor = generatePaginationToken(foldersPage[len(foldersPage)-1])
-	}
+    // Create the paginated slice of folders
+    foldersPage := allFolders[startIndex:endIndex]
 
-	// Return the paginated response
-	return &PaginatedFetchFolderResponse{
-		Folders:    foldersPage,
-		NextCursor: nextCursor,
-	}, nil
+    // Generate the next cursor token if there's more data
+	isLastPage := endIndex >= len(allFolders)
+	nextCursor := generatePaginationToken(allFolders[endIndex-1], isLastPage)
+
+    // Return the paginated response
+    return &PaginatedFetchFolderResponse{
+        Folders:    foldersPage,
+        NextCursor: nextCursor,
+    }, nil
 }
-
 // PaginationTokenStruct defines the structure of the pagination token.
 
 type PaginationTokenStruct struct {
@@ -77,12 +81,22 @@ type PaginationTokenStruct struct {
 }
 
 // Helper function to generate a pagination token from the last folder in a page
-func generatePaginationToken(lastFolder *Folder) string {
-	tokenStruct := PaginationTokenStruct{
-		LastID: lastFolder.Id,
-	}
-	tokenBytes, _ := json.Marshal(tokenStruct) // Ignoring error for brevity, but handle it in production
-	return base64.URLEncoding.EncodeToString(tokenBytes)
+func generatePaginationToken(lastFolder *Folder, isLastPage bool) string {
+    // If lastFolder is nil, return an empty string (no more data to paginate)
+	if lastFolder == nil || isLastPage {
+        return "END_OF_DATA"
+    }
+
+    // Generate token based on the last folder's ID
+    tokenStruct := PaginationTokenStruct{
+        LastID: lastFolder.Id,
+    }
+    tokenBytes, err := json.Marshal(tokenStruct)
+    if err != nil {
+        fmt.Printf("Error generating pagination token: %v\n", err)
+        return ""
+    }
+    return base64.URLEncoding.EncodeToString(tokenBytes)
 }
 
 // Helper function to parse a pagination token back into the last ID
