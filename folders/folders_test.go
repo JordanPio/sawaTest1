@@ -2,12 +2,9 @@ package folders_test
 
 import (
 	"testing"
-	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/georgechieng-sc/interns-2022/folders"
 	"github.com/stretchr/testify/assert"
-	// "encoding/base64"
-	// "encoding/json"
 )
 
 
@@ -104,11 +101,6 @@ func TestGetPaginatedAllFolders(t *testing.T) {
 		}
 		firstResp, _ := folders.GetPaginatedAllFolders(firstReq)
 
-		//   for _, folder := range firstResp.Folders {
-        //     fmt.Printf("Folder ID: %s, Name: %s, OrgID: %s, Deleted: %v\n",
-        //         folder.Id, folder.Name, folder.OrgId, folder.Deleted)
-        // }
-
 		// Request the second page using the cursor from the first response
 		secondReq := &folders.PaginatedFetchFolderRequest{
 			OrgID:  orgID,
@@ -117,11 +109,6 @@ func TestGetPaginatedAllFolders(t *testing.T) {
 		}
 		secondResp, _ := folders.GetPaginatedAllFolders(secondReq)
 
-		// 	  for _, folder := range secondResp.Folders {
-        //     fmt.Printf("Folder ID: %s, Name: %s, OrgID: %s, Deleted: %v\n",
-        //         folder.Id, folder.Name, folder.OrgId, folder.Deleted)
-        // }
-
 		// Now, try to get the third page, which should be empty
 		thirdReq := &folders.PaginatedFetchFolderRequest{
 			OrgID:  orgID,
@@ -129,14 +116,6 @@ func TestGetPaginatedAllFolders(t *testing.T) {
 			Token: secondResp.Token,
 		}
 		thirdResp, err := folders.GetPaginatedAllFolders(thirdReq)
-
-		if len(thirdResp.Folders) > 0 {
-        // If there are folders, print their details
-        for _, folder := range thirdResp.Folders {
-            fmt.Printf(" THIRD FOLDER ------- Folder ID: %s, Name: %s, OrgID: %s, Deleted: %v\n",
-                folder.Id, folder.Name, folder.OrgId, folder.Deleted)
-        }
-    }
 
 		// Assertions to ensure the third response is empty
 		assert.NoError(t, err)

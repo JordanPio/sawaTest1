@@ -7,7 +7,6 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-// PaginationTokenStruct defines the structure of the pagination token.
 type PaginationTokenStruct struct {
 	LastID uuid.UUID `json:"lastId"`
 }
