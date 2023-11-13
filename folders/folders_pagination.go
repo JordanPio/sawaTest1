@@ -8,21 +8,21 @@ import (
 // Pagination parameters added to the request struct
 type PaginatedFetchFolderRequest struct {
 	OrgID  uuid.UUID
-	Cursor string // Cursor is the pagination token
+	Token string // pagination token
 	Limit  int    // Limit is the number of items per page
 }
 
 // Pagination token and data added to the response struct
 type PaginatedFetchFolderResponse struct {
 	Folders []*Folder
-	NextCursor string // NextCursor is the pagination token for the next page
+	Token string // token for the next page
 }
 
 // Pagination logic in GetAllFolders
 func GetPaginatedAllFolders(req *PaginatedFetchFolderRequest) (*PaginatedFetchFolderResponse, error) {
 
 	// Check for end of data
-    if req.Cursor == "END_OF_DATA" {
+    if req.Token == "END_OF_DATA" {
         return generateEmptyResponse(), nil
     }
 
@@ -34,7 +34,7 @@ func GetPaginatedAllFolders(req *PaginatedFetchFolderRequest) (*PaginatedFetchFo
     allFolders := nonPaginatedResponse.Folders
 
 	// Paginate folders
-    foldersPage, nextCursor, err := paginateFolders(allFolders, req.Cursor, req.Limit)
+    foldersPage, nextToken, err := paginateFolders(allFolders, req.Token, req.Limit)
     if err != nil {
         return nil, err
     }
@@ -42,7 +42,7 @@ func GetPaginatedAllFolders(req *PaginatedFetchFolderRequest) (*PaginatedFetchFo
     // Return the paginated response
     return &PaginatedFetchFolderResponse{
         Folders:    foldersPage,
-        NextCursor: nextCursor,
+        Token: nextToken,
     }, nil
 }
 
@@ -50,12 +50,12 @@ func GetPaginatedAllFolders(req *PaginatedFetchFolderRequest) (*PaginatedFetchFo
 func generateEmptyResponse() *PaginatedFetchFolderResponse {
     return &PaginatedFetchFolderResponse{
         Folders:    []*Folder{},
-        NextCursor: "END_OF_DATA",
+        Token: "END_OF_DATA",
     }
 }
 
-func paginateFolders(allFolders []*Folder, cursor string, limit int) ([]*Folder, string, error) {
-    startingAfter, err := ParsePaginationToken(cursor)
+func paginateFolders(allFolders []*Folder, token string, limit int) ([]*Folder, string, error) {
+    startingAfter, err := ParsePaginationToken(token)
     if err != nil {
         return nil, "", err
     }
@@ -63,9 +63,9 @@ func paginateFolders(allFolders []*Folder, cursor string, limit int) ([]*Folder,
     startIndex, endIndex := calculatePaginationIndexes(allFolders, startingAfter, limit)
 
     foldersPage := allFolders[startIndex:endIndex]
-    nextCursor := generateNextCursor(foldersPage, endIndex, len(allFolders))
+    nextToken := generateNextToken(foldersPage, endIndex, len(allFolders))
 
-    return foldersPage, nextCursor, nil
+    return foldersPage, nextToken, nil
 }
 
 func calculatePaginationIndexes(allFolders []*Folder, startingAfter *PaginationTokenStruct, limit int) (int, int) {
@@ -87,7 +87,7 @@ func calculatePaginationIndexes(allFolders []*Folder, startingAfter *PaginationT
     return startIndex, endIndex
 }
 
-func generateNextCursor(foldersPage []*Folder, endIndex, totalFolders int) string {
+func generateNextToken(foldersPage []*Folder, endIndex, totalFolders int) string {
     if endIndex >= totalFolders {
         return "END_OF_DATA"
     }

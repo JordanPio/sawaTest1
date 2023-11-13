@@ -62,8 +62,8 @@ Description of my function
 3. What If Error Happens
    If there's a problem getting folders, the function stops and says there is an error.
 
-4. Understand the Cursor
-   Next, it uses parsePaginationToken to understand the cursor. This helps to know where to start showing folders.
+4. Understand the Token Logic
+   the function uses parsePaginationToken to understand the cursor. This helps to know where to start showing folders.
 
 5. Find Start Point
    It then finds where to start showing folders. If the cursor has a LastID, it searches for this ID in the folders.
@@ -77,8 +77,8 @@ Description of my function
 8. Prepare for Next Time
    It prepares for the next request. It makes a new cursor for where to start next time using generatePaginationToken.
 
-9. Send Back the Folders and Cursor
-   Lastly, it sends back the folders and new cursor in something called `PaginatedFetchFolderResponse.`
+9. Send Back the Folders and Token
+   Lastly, it sends back the folders and new token in something called `PaginatedFetchFolderResponse.`
 
 ## Helper Functions
 

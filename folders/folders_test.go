@@ -54,7 +54,7 @@ func TestGetPaginatedAllFolders(t *testing.T) {
 		req := &folders.PaginatedFetchFolderRequest{
 			OrgID:  orgID,
 			Limit:  1, // Setting the limit to 1 for this test
-			Cursor: "", // Start with an empty cursor to get the first page
+			Token: "", // Start with an empty cursor to get the first page
 		}
 
 		// Call the paginated function
@@ -74,7 +74,7 @@ func TestGetPaginatedAllFolders(t *testing.T) {
 		nextReq := &folders.PaginatedFetchFolderRequest{
 			OrgID:  orgID,
 			Limit:  1,
-			Cursor: resp.NextCursor, // Use the cursor from the previous response
+			Token: resp.Token, // Use the cursor from the previous response
 		}
 
 		nextResp, err := folders.GetPaginatedAllFolders(nextReq)
@@ -90,7 +90,7 @@ func TestGetPaginatedAllFolders(t *testing.T) {
 		assert.True(t, secondFolder.Deleted)
 
 		// Ensure there's no next cursor after the second folder, indicating the end of the data
-		assert.Equal(t, "END_OF_DATA", nextResp.NextCursor)
+		assert.Equal(t, "END_OF_DATA", nextResp.Token)
 
 	})
 
@@ -100,7 +100,7 @@ func TestGetPaginatedAllFolders(t *testing.T) {
 		firstReq := &folders.PaginatedFetchFolderRequest{
 			OrgID:  orgID,
 			Limit:  1, // Assuming limit is set to the number of folders per page
-			Cursor: "",
+			Token: "",
 		}
 		firstResp, _ := folders.GetPaginatedAllFolders(firstReq)
 
@@ -113,7 +113,7 @@ func TestGetPaginatedAllFolders(t *testing.T) {
 		secondReq := &folders.PaginatedFetchFolderRequest{
 			OrgID:  orgID,
 			Limit:  1,
-			Cursor: firstResp.NextCursor,
+			Token: firstResp.Token,
 		}
 		secondResp, _ := folders.GetPaginatedAllFolders(secondReq)
 
@@ -126,7 +126,7 @@ func TestGetPaginatedAllFolders(t *testing.T) {
 		thirdReq := &folders.PaginatedFetchFolderRequest{
 			OrgID:  orgID,
 			Limit:  1,
-			Cursor: secondResp.NextCursor,
+			Token: secondResp.Token,
 		}
 		thirdResp, err := folders.GetPaginatedAllFolders(thirdReq)
 
@@ -141,17 +141,17 @@ func TestGetPaginatedAllFolders(t *testing.T) {
 		// Assertions to ensure the third response is empty
 		assert.NoError(t, err)
 		assert.Empty(t, thirdResp.Folders, "Expected no folders on the third page")
-		assert.Equal(t, "END_OF_DATA", thirdResp.NextCursor)
+		assert.Equal(t, "END_OF_DATA", thirdResp.Token)
 
 	})
 
 
-	t.Run("Invalid Cursor Token", func(t *testing.T) {
+	t.Run("Invalid Token", func(t *testing.T) {
 			// Request with an invalid cursor token
 			req := &folders.PaginatedFetchFolderRequest{
 				OrgID:  orgID,
 				Limit:  1,
-				Cursor: "invalidCursor",
+				Token: "invalidToken",
 			}
 			_, err := folders.GetPaginatedAllFolders(req)
 			// We expect an error due to the invalid cursor
@@ -163,7 +163,7 @@ func TestGetPaginatedAllFolders(t *testing.T) {
 			req := &folders.PaginatedFetchFolderRequest{
 				OrgID:  orgID,
 				Limit:  10, // Large limit to fetch all data in one go
-				Cursor: "",
+				Token: "",
 			}
 			resp, err := folders.GetPaginatedAllFolders(req)
 			assert.NoError(t, err)
@@ -171,7 +171,7 @@ func TestGetPaginatedAllFolders(t *testing.T) {
 			// We expect to get all folders since the limit exceeds the number of available folders
 			assert.Len(t, resp.Folders, 2)
 			// Since all data is fetched, the next cursor should be empty
-			assert.Equal(t, "END_OF_DATA", resp.NextCursor)
+			assert.Equal(t, "END_OF_DATA", resp.Token)
 		})
 
 }
