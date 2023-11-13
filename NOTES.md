@@ -48,3 +48,43 @@ the tests validate that my function is working correct after refactoring
   I believe it is a good fit for this assignment because it is efficient for the server as there is no counting of rows and can handles the potential of new data well.
 - I've created some tests for the function
 - Found a bug on my function due to my test "Paginate Beyond Data Set" and fixed
+
+Description of my function
+
+## Function: GetPaginatedAllFolders
+
+1. Check for 'No More Data'
+   First, this function looks if the cursor says "END_OF_DATA". If yes, it returns no folders and the same "END_OF_DATA". This means there are no more folders to give.
+
+2. Get All Folders
+   Then, it takes all folders using a function called GetAllFolders. It uses OrgID from our request for this.
+
+3. What If Error Happens
+   If there's a problem getting folders, the function stops and says there is an error.
+
+4. Understand the Cursor
+   Next, it uses parsePaginationToken to understand the cursor. This helps to know where to start showing folders.
+
+5. Find Start Point
+   It then finds where to start showing folders. If the cursor has a LastID, it searches for this ID in the folders.
+
+6. Decide End Point
+   It calculates where to stop showing folders. It adds the limit to the start point but makes sure it's not more than the total folders.
+
+7. Select Folders to Show
+   The function selects a part of the folder list from the start to the end point.
+
+8. Prepare for Next Time
+   It prepares for the next request. It makes a new cursor for where to start next time using generatePaginationToken.
+
+9. Send Back the Folders and Cursor
+   Lastly, it sends back the folders and new cursor in something called `PaginatedFetchFolderResponse.`
+
+## Helper Functions
+
+1. generatePaginationToken
+   This makes a new cursor from the last folder's ID. If it's the last folder or there's none, it gives "END_OF_DATA".
+
+2. parsePaginationToken
+   This function changes a cursor from base64 into a structure the program can use, including the LastID.
+   So, this is how the function works. It's like a process of getting folders in parts, based on where to start and end, and preparing for the next part.
